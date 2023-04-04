@@ -2,8 +2,8 @@ from player import Player
 
 
 class RosterSlot:
-    def __init__(self, players: list[Player], positions: list[str], number_of_slots: int) -> None:
-        self.positions = positions
+    def __init__(self, players: list[Player], positions: str, number_of_slots: int) -> None:
+        self.positions = positions.split("/")
         self.number_of_slots = number_of_slots
         self.active_players = []
         self.available_players = []

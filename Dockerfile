@@ -1,6 +1,5 @@
 FROM python
 
-
 WORKDIR /app/
 
 ENV \

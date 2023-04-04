@@ -28,11 +28,12 @@ class Roster:
     def solve(self):
         self.update_available_players()
         if self.complete():
-            return True
+            return self.get_roster()
         else:
             current_slot = self.highest_priority_slot()
-            current_slot.fill_slot()
-            self.solve()
+            if current_slot:    
+                current_slot.fill_slot()
+                return self.solve()
 
     def update_available_players(self):
         for slot in self.roster_slots:
