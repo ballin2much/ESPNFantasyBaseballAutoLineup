@@ -6,6 +6,8 @@ from player import Player
 from roster import Roster
 
 def click_roster(driver: webdriver, pitcher: bool, xpath: str):
+    """Calculates and clicks the final roster."""
+
     numRows = len(driver.find_elements(By.XPATH, xpath + '/div/div/table/tbody/tr'))
     
      # Array of players on roster
