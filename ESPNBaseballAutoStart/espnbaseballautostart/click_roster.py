@@ -18,6 +18,7 @@ def click_roster(driver: webdriver, pitcher: bool, xpath: str):
     
     # Loop through each table row in the batter table
     for row in range(1, numRows+1):
+        rating = 0
         rowXpath = xpath + '/div/div/table/tbody/tr[' + str(row) + ']'
         try:
             '''
@@ -41,6 +42,10 @@ def click_roster(driver: webdriver, pitcher: bool, xpath: str):
             # Finds all the positions the player is currently eligble for
             if pitcher:
                 player_positions = ["P"]
+                positions = driver.find_element(By.XPATH, rowXpath + '/td[2]/div/div/div[2]/div/div[2]/span[2]').text.split(", ")
+                for p in positions:
+                    if p == "RP":
+                        rating += 1
             else:    
                 player_positions = driver.find_element(By.XPATH, rowXpath + '/td[2]/div/div/div[2]/div/div[2]/span[2]').text.split(", ")
                 player_positions.append("UTIL")
@@ -57,9 +62,17 @@ def click_roster(driver: webdriver, pitcher: bool, xpath: str):
             except NoSuchElementException:
                 injured = False
             
+            if pitcher:
+                try:
+                    pp = driver.find_element(By.XPATH, rowXpath + '/td[2]/div/div/div[2]/div/div[1]/strong').text
+                    if pp == "PP":
+                        rating += 2
+                except NoSuchElementException:
+                    pass
             # Create Player object using above info and add to players array
-            player = Player(name, player_positions, has_game, injured, 1)            
-            players.append(player)
+            if current_league_position != "IL":
+                player = Player(name, player_positions, has_game, injured, rating)            
+                players.append(player)
         except NoSuchElementException:
             pass
 
@@ -89,7 +102,7 @@ def click_roster(driver: webdriver, pitcher: bool, xpath: str):
                 del formatted_roster[index]
                 break
     
-    # Clicking the buutton to move players to the correct slot
+    # Clicking the button to move players to the correct slot
     for slot in roster_slots:
         if 3 == len(slot):
             index = int(driver.find_element(By.XPATH, xpath + '/div/div/table/tbody/tr[.//*[text()="' + slot[2] + '"]]').get_attribute("data-idx"))
