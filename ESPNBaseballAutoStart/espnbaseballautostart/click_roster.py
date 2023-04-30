@@ -15,7 +15,7 @@ def click_roster(driver: webdriver, pitcher: bool, xpath: str):
     # What positions the league allows (IE 1B, 2B, 1B/2B, etc.)
     league_positions = []
     roster_slots = []
-    
+    il_slots = 0
     # Loop through each table row in the batter table
     for row in range(1, numRows+1):
         rating = 0
@@ -26,7 +26,9 @@ def click_roster(driver: webdriver, pitcher: bool, xpath: str):
             current_league_position is an array of strings for each position. So "1B/2B" would become [1B, 2B]
             '''
             current_league_position = driver.find_element(By.XPATH, rowXpath + '/td[1]/div').text
-            if current_league_position != "Bench" and current_league_position != "IL":
+            if current_league_position == "IL":
+                il_slots += 1
+            elif current_league_position != "Bench":
                 roster_slots.append([current_league_position, row])
                 if not league_positions:
                     league_positions.append([current_league_position, 1])
@@ -59,6 +61,9 @@ def click_roster(driver: webdriver, pitcher: bool, xpath: str):
                 el = driver.find_element(By.XPATH, rowXpath + '/td[2]/div/div/div[2]/div/div[1]/span[2]')
                 if not el.text:
                     injured = False
+                elif el.text == "DTD":
+                    injured = False
+                    rating -= 1
             except NoSuchElementException:
                 injured = False
             
@@ -76,6 +81,7 @@ def click_roster(driver: webdriver, pitcher: bool, xpath: str):
         except NoSuchElementException:
             pass
 
+    numRows -= il_slots
     # Create Roster object using players array and save solved_roster
     roster = Roster(players, league_positions)
     final_roster = roster.solve()
@@ -120,6 +126,7 @@ def click_roster(driver: webdriver, pitcher: bool, xpath: str):
                     if pitcher:
                         driver.find_element(By.XPATH, xpath + '/div/div/table/tbody/tr[' + str(len(roster_slots)+1) + ']/td[3]/div/div/button').click()
                     else:
+                        driver.save_screenshot("sreen.png")
                         driver.find_element(By.XPATH, xpath + '/div/div/table/tbody/tr[' + str(numRows+1) + ']/td[3]/div/div/button').click()
                     time.sleep(3)
                     index = int(driver.find_element(By.XPATH, xpath + '/div/div/table/tbody/tr[.//*[text()="' + slot[2] + '"]]').get_attribute("data-idx"))
